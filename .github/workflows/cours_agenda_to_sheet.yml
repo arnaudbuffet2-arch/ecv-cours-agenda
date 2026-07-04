@@ -33,7 +33,7 @@ jobs:
           mois = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
           print('mois=' + mois[prev.month - 1])
           print('annee=' + str(prev.year))
-          " >> \$GITHUB_OUTPUT
+          " >> $GITHUB_OUTPUT
 
       - name: Setup Google credentials
         env:
