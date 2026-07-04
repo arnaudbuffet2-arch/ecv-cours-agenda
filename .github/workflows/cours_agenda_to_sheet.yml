@@ -50,3 +50,12 @@ jobs:
           python3 cours_agenda_to_sheet.py \
             --mois "${{ steps.prev.outputs.mois }}" \
             --annee ${{ steps.prev.outputs.annee }}
+
+      - name: Save updated tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -f ~/.ecv/tokens.json ]; then
+            cat ~/.ecv/tokens.json | gh secret set GOOGLE_TOKENS_ECV_JSON --repo ${{ github.repository }}
+          fi
