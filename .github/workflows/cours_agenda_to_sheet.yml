@@ -1,0 +1,52 @@
+name: Cours agenda → Sheet ECV
+
+on:
+  workflow_dispatch:        # déclenché par cron-job.org via l'API GitHub
+
+jobs:
+  sync-cours:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install \
+            google-api-python-client==2.131.0 \
+            google-auth==2.29.0 \
+            google-auth-oauthlib==1.2.0
+
+      - name: Compute previous month
+        id: prev
+        run: |
+          python3 -c "
+          from datetime import date, timedelta
+          first = date.today().replace(day=1)
+          prev = first - timedelta(days=1)
+          mois = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+          print('mois=' + mois[prev.month - 1])
+          print('annee=' + str(prev.year))
+          " >> \$GITHUB_OUTPUT
+
+      - name: Setup Google credentials
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          GOOGLE_TOKENS_ECV_JSON: ${{ secrets.GOOGLE_TOKENS_ECV_JSON }}
+        run: |
+          mkdir -p ~/.ecv
+          printf '%s' "$GOOGLE_CREDENTIALS_JSON" > ~/.ecv/credentials.json
+          printf '%s' "$GOOGLE_TOKENS_ECV_JSON" > ~/.ecv/tokens.json
+
+      - name: Run cours_agenda_to_sheet
+        run: |
+          cd "claude safe"
+          python3 cours_agenda_to_sheet.py \
+            --mois "${{ steps.prev.outputs.mois }}" \
+            --annee ${{ steps.prev.outputs.annee }}
