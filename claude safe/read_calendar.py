@@ -72,7 +72,7 @@ def read_cours_du_mois(year=None, month=None):
     time_min, time_max = get_month_boundaries(year, month)
 
     events_result = service.events().list(
-        calendarId="primary",
+        calendarId="emilecoachvocal@gmail.com",
         timeMin=time_min,
         timeMax=time_max,
         singleEvents=True,
