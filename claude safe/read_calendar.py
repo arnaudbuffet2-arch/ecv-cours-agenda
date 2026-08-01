@@ -1,19 +1,21 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from googleapiclient.discovery import build
 from google_auth import get_google_credentials
 from anonymize import get_token, load_mapping, save_mapping
 
 BLOCKED_CALENDARS = []
+PARIS_TZ = ZoneInfo("Europe/Paris")
 
 def get_month_boundaries(year=None, month=None):
-    now = datetime.now()
+    now = datetime.now(PARIS_TZ)
     year = year or now.year
     month = month or now.month
-    start = datetime(year, month, 1, tzinfo=timezone.utc)
+    start = datetime(year, month, 1, tzinfo=PARIS_TZ)
     if month == 12:
-        end = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        end = datetime(year + 1, 1, 1, tzinfo=PARIS_TZ)
     else:
-        end = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+        end = datetime(year, month + 1, 1, tzinfo=PARIS_TZ)
     return start.isoformat(), end.isoformat()
 
 def is_cours_event(event):
