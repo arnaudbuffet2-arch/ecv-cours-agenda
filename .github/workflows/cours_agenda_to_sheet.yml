@@ -27,8 +27,10 @@ jobs:
         id: prev
         run: |
           python3 -c "
-          from datetime import date, timedelta
-          first = date.today().replace(day=1)
+          from datetime import timedelta, datetime
+          from zoneinfo import ZoneInfo
+          today = datetime.now(ZoneInfo('Europe/Paris')).date()
+          first = today.replace(day=1)
           prev = first - timedelta(days=1)
           mois = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
           print('mois=' + mois[prev.month - 1])
