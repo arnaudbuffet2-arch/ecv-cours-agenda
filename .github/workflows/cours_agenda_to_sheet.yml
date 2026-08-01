@@ -55,6 +55,7 @@ jobs:
 
       - name: Save updated tokens
         if: always()
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
