@@ -39,12 +39,10 @@ jobs:
 
       - name: Setup Google credentials
         env:
-          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
-          GOOGLE_TOKENS_ECV_JSON: ${{ secrets.GOOGLE_TOKENS_ECV_JSON }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: |
           mkdir -p ~/.ecv
-          printf '%s' "$GOOGLE_CREDENTIALS_JSON" > ~/.ecv/credentials.json
-          printf '%s' "$GOOGLE_TOKENS_ECV_JSON" > ~/.ecv/tokens.json
+          printf '%s' "$GOOGLE_SERVICE_ACCOUNT_JSON" > ~/.ecv/service_account.json
 
       - name: Run cours_agenda_to_sheet
         run: |
@@ -52,13 +50,3 @@ jobs:
           python3 cours_agenda_to_sheet.py \
             --mois "${{ steps.prev.outputs.mois }}" \
             --annee ${{ steps.prev.outputs.annee }}
-
-      - name: Save updated tokens
-        if: always()
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          if [ -f ~/.ecv/tokens.json ]; then
-            cat ~/.ecv/tokens.json | gh secret set GOOGLE_TOKENS_ECV_JSON --repo ${{ github.repository }}
-          fi

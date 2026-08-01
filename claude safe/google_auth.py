@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from google.auth.exceptions import RefreshError
+from google.oauth2 import service_account
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -8,6 +9,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 ECV_DIR = Path.home() / ".ecv"
 CREDENTIALS_PATH = ECV_DIR / "credentials.json"
 TOKEN_PATH = ECV_DIR / "tokens.json"
+SERVICE_ACCOUNT_PATH = ECV_DIR / "service_account.json"
 
 SCOPES = [
     "https://www.googleapis.com/auth/calendar",
@@ -15,6 +17,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/gmail.compose",
     "https://www.googleapis.com/auth/documents.readonly",
     "https://www.googleapis.com/auth/drive.readonly",
+    "https://mail.google.com/",
 ]
 
 
@@ -29,6 +32,11 @@ def _reauth():
 
 
 def get_google_credentials():
+    if SERVICE_ACCOUNT_PATH.exists():
+        return service_account.Credentials.from_service_account_file(
+            str(SERVICE_ACCOUNT_PATH), scopes=SCOPES
+        )
+
     if not CREDENTIALS_PATH.exists():
         raise FileNotFoundError(f"Credentials Google introuvables : {CREDENTIALS_PATH}")
 
