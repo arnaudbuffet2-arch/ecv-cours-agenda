@@ -2,6 +2,15 @@ name: Cours agenda → Sheet ECV
 
 on:
   workflow_dispatch:        # déclenché par cron-job.org via l'API GitHub
+    inputs:                 # facultatifs : sans eux, on traite le mois précédent
+      mois:
+        description: "Mois à forcer (ex: Octobre) — vide = mois précédent"
+        required: false
+        default: ""
+      annee:
+        description: "Année à forcer (ex: 2026) — vide = année du mois précédent"
+        required: false
+        default: ""
 
 jobs:
   sync-cours:
@@ -25,16 +34,20 @@ jobs:
 
       - name: Compute previous month
         id: prev
+        env:
+          INPUT_MOIS: ${{ inputs.mois }}
+          INPUT_ANNEE: ${{ inputs.annee }}
         run: |
           python3 -c "
+          import os
           from datetime import timedelta, datetime
           from zoneinfo import ZoneInfo
           today = datetime.now(ZoneInfo('Europe/Paris')).date()
           first = today.replace(day=1)
           prev = first - timedelta(days=1)
           mois = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
-          print('mois=' + mois[prev.month - 1])
-          print('annee=' + str(prev.year))
+          print('mois=' + (os.environ.get('INPUT_MOIS', '').strip() or mois[prev.month - 1]))
+          print('annee=' + (os.environ.get('INPUT_ANNEE', '').strip() or str(prev.year)))
           " >> $GITHUB_OUTPUT
 
       - name: Setup Google credentials
