@@ -16,7 +16,10 @@ from datetime import datetime
 from pathlib import Path
 
 from read_calendar import read_cours_du_mois, anonymize_cours
-from write_sheet import ecrire_cours, get_service, SHEET_ID, TAB, MOIS_COLONNES, ensure_mois_initialized
+from write_sheet import (
+    ecrire_cours, get_service, SHEET_ID, TAB, ensure_mois_initialized,
+    resolve_col, col_to_num, num_to_col,
+)
 
 MOIS_VERS_NUM = {
     "Janvier": 1, "Février": 2, "Mars": 3, "Avril": 4,
@@ -27,11 +30,12 @@ MOIS_VERS_NUM = {
 NUM_VERS_MOIS = {v: k for k, v in MOIS_VERS_NUM.items()}
 
 
-def clear_mois(service, mois):
-    col = MOIS_COLONNES[mois]
+def clear_mois(service, mois, annee):
+    col = resolve_col(service, mois, annee)
+    col_fin = num_to_col(col_to_num(col) + 4)
     service.spreadsheets().values().clear(
         spreadsheetId=SHEET_ID,
-        range=f"'{TAB}'!{col}5:{col}Z50",
+        range=f"'{TAB}'!{col}3:{col_fin}50",
     ).execute()
 
 
@@ -61,8 +65,8 @@ def main():
 
     service = get_service()
     ensure_mois_initialized(service, mois_nom, annee)
-    clear_mois(service, mois_nom)
-    ecrire_cours(cours_anonymises, mois=mois_nom, dry_run=False, silent=True)
+    clear_mois(service, mois_nom, annee)
+    ecrire_cours(cours_anonymises, mois=mois_nom, annee=annee, dry_run=False, silent=True)
 
     print(f"{len(cours_anonymises)} cours écrits dans '{TAB}' — {mois_nom} {annee}.")
 
